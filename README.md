@@ -177,9 +177,10 @@ try {
   }
 ]
 
-پڕۆژەیەکی سادەی Html
+```
 
-```html
+پڕۆژەیەکی سادەی HTML بەکارهێنانی ئەو حەدیثانە
+ ```html
 <!DOCTYPE html>
 <html lang="ckb" dir="rtl">
 <head>
@@ -396,4 +397,3 @@ try {
 
 </body>
 </html>
-
