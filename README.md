@@ -176,3 +176,224 @@ try {
     ]
   }
 ]
+
+پڕۆژەیەکی سادەی Html
+
+```html
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سەحیحی بوخاری بە کوردی</title>
+    <style>
+        body {
+            font-family: 'Tahoma', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .controls-container {
+            max-width: 900px;
+            margin: 0 auto 25px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: space-between;
+        }
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        select, input, button {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        button {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .hadith-card {
+            background-color: #ffffff;
+            border-right: 4px solid #e67e22;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .hadith-info {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+        .hadith-by {
+            font-weight: bold;
+            color: #c0392b;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+        .hadith-text {
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>سەحیحی بوخاری بە کوردی</h2>
+
+    <div class="controls-container">
+        <div class="control-group">
+            <label for="vol-select">بەرگ:</label>
+            <select id="vol-select">
+                <option value="">بەرگێک هەڵبژێرە</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="book-select">کتێب:</label>
+            <select id="book-select" disabled>
+                <option value="">کتێبێک هەڵبژێرە</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="hadith-number">ژمارەی فەرموودە:</label>
+            <input type="number" id="hadith-number" placeholder="بۆ نموونە: ١">
+        </div>
+        <button id="search-btn">گەڕان</button>
+    </div>
+
+    <div class="container" id="app-container"></div>
+
+    <script>
+        const url = 'https://raw.githubusercontent.com/kamyarkarzanosman/sahihbukhary-kurdish/main/سەحی%20بوخاری%20کوردی.json';
+        let globalData = [];
+
+        // ناردنی داواکاری و بارکردنی سەرەکی
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                globalData = data;
+                populateVolumes();
+            })
+            .catch(error => {
+                console.error('هەڵە:', error);
+                document.getElementById('app-container').innerText = 'تکایە دڵنیا ببەرەوە لە هێڵی ئینتەرنێت.';
+            });
+
+        // پڕکردنەوەی ناوی بەرگەکان
+        function populateVolumes() {
+            const volSelect = document.getElementById('vol-select');
+            globalData.forEach((vol, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = vol.name || `بەرگی ${index + 1}`;
+                volSelect.appendChild(option);
+            });
+        }
+
+        // چالاککردنی کتێبەکان کاتێک بەرگێک هەڵدەبژێردرێت
+        document.getElementById('vol-select').addEventListener('change', function() {
+            const bookSelect = document.getElementById('book-select');
+            bookSelect.innerHTML = '<option value="">کتێبێک هەڵبژێرە</option>';
+            bookSelect.disabled = true;
+
+            const volIndex = this.value;
+            if (volIndex !== "") {
+                const books = globalData[volIndex].books || [];
+                books.forEach((book, bIndex) => {
+                    const option = document.createElement('option');
+                    option.value = bIndex;
+                    option.textContent = book.name;
+                    bookSelect.appendChild(option);
+                });
+                bookSelect.disabled = false;
+            }
+        });
+
+        // دوگمەی گەڕان
+        document.getElementById('search-btn').addEventListener('click', function() {
+            const volIndex = document.getElementById('vol-select').value;
+            const bIndex = document.getElementById('book-select').value;
+            const hNumber = document.getElementById('hadith-number').value;
+
+            const container = document.getElementById('app-container');
+            container.innerHTML = '';
+
+            if (volIndex === "") {
+                container.innerHTML = '<p style="text-align:center;">تکایە سەرەتا بەرگێک هەڵبژێرە.</p>';
+                return;
+            }
+
+            const vol = globalData[volIndex];
+            
+            if (bIndex === "") {
+                // نیشاندانی تەواوی فەرموودەکانی بەرگەکە
+                let html = '';
+                vol.books.forEach(book => {
+                    book.hadiths.forEach(h => {
+                        html += createCardHTML(h);
+                    });
+                });
+                container.innerHTML = html;
+            } else {
+                const book = vol.books[bIndex];
+                if (hNumber !== "") {
+                    // گەڕان بەپێی ژمارەی فەرموودە
+                    const index = parseInt(hNumber) - 1;
+                    if (index >= 0 && index < book.hadiths.length) {
+                        container.innerHTML = createCardHTML(book.hadiths[index]);
+                    } else {
+                        container.innerHTML = `<p style="text-align:center;">فەرموودەی ژمارە ${hNumber} لەم کتێبەدا بوونی نییە.</p>`;
+                    }
+                } else {
+                    // نیشاندانی هەموو فەرموودەکانی کتێبەکە
+                    let html = '';
+                    book.hadiths.forEach(h => {
+                        html += createCardHTML(h);
+                    });
+                    container.innerHTML = html;
+                }
+            }
+        });
+
+        function createCardHTML(h) {
+            return `
+                <div class="hadith-card">
+                    <div class="hadith-info">${h.info || ''}</div>
+                    <div class="hadith-by">گێڕاوە: ${h.by || 'ناڕوون'}</div>
+                    <div class="hadith-text">${h.text || ''}</div>
+                </div>
+            `;
+        }
+    </script>
+
+</body>
+</html>
+
