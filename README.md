@@ -1,3 +1,5 @@
+also check sahih muslim in kurdish : 
+https://github.com/kamyarkarzanosman/--json/edit/main/sahihmuslimkurdi.json
 
 # Sahih Al-Bukhari in Kurdish (سەحیحی بوخاری بە کوردی)
 
